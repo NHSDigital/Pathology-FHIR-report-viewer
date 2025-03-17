@@ -53,7 +53,7 @@ def process_fhir_bundle_report_to_text(
     for i_service_request,service_request in enumerate(path_report_components.service_requests):
         text_report_strings.append("")
         text_report_strings.append(f"SERVICE_REQUEST ({i_service_request+1})")      
-        service_request_data=ServiceRequestData(service_request=service_request)
+        service_request_data=ServiceRequestData(service_request=service_request, resources_by_fullUrl=resources_by_fullUrl)
         text_report_strings.append(f"Request Id:        {service_request_data.request_id}")
         text_report_strings.append(f"Requisition Id:    {service_request_data.requisition_id}")
         text_report_strings.append(f"Requested test:    {service_request_data.requested_test}")
