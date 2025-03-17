@@ -1,0 +1,27 @@
+
+#
+# The requirements are basically:
+# 
+# flask
+# fhir.resources[xml]==7.0.2   # NB using the latest in Mar 2025 (8.0.0) caused an "Unknown content-type" error 
+#                             # reading the xml bundle that did not pursue
+#
+# The list below are the versions of these (and of dependencies) that 
+# worked in March 2025 after pip installing the two items above
+#
+
+fhir.resources==7.0.2
+Flask==3.1.0
+
+blinker==1.9.0
+click==8.1.8
+dnspython==2.7.0
+email_validator==2.2.0
+idna==3.10
+itsdangerous==2.2.0
+Jinja2==3.1.6
+lxml==5.3.1
+MarkupSafe==3.0.2
+pydantic==1.10.21
+typing_extensions==4.12.2
+Werkzeug==3.1.3
