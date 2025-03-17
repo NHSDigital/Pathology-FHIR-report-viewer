@@ -42,7 +42,7 @@ def process_fhir_bundle_report_to_text(
     # text_report_strings.append(f"sp: {[x.id for x in specimens]}")
     # text_report_strings.append(f"po: {[x.id for x in primary_observations]}")
     
-    text_report_strings.append(f"ABOUT THE PATIENT!!!")
+    text_report_strings.append(f"PATIENT")
     patient_data=PatientData(patient_resource=path_report_components.patient)
     text_report_strings.append(f"NHS Number: {patient_data.nhs_number}")
     text_report_strings.append(f"Name:       {patient_data.name}")
