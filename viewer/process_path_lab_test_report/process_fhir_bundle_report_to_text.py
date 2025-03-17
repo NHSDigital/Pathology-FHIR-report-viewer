@@ -42,56 +42,68 @@ def process_fhir_bundle_report_to_text(
     # text_report_strings.append(f"sp: {[x.id for x in specimens]}")
     # text_report_strings.append(f"po: {[x.id for x in primary_observations]}")
     
+    text_report_strings.append(f"PATIENT")
     patient_data=PatientData(patient_resource=path_report_components.patient)
-    text_report_strings.append("")
-    text_report_strings.append(f'NHS Number: {patient_data.nhs_number}')
-    text_report_strings.append(f'Name:       {patient_data.name}')
-    text_report_strings.append(f'Address:    {patient_data.address}')
-    text_report_strings.append(f'DOB:        {patient_data.dob}')
-    text_report_strings.append(f'Gender:     {patient_data.gender}')
+    text_report_strings.append(f"NHS Number: {patient_data.nhs_number}")
+    text_report_strings.append(f"Name:       {patient_data.name}")
+    text_report_strings.append(f"Address:    {patient_data.address}")
+    text_report_strings.append(f"DOB:        {patient_data.dob}")
+    text_report_strings.append(f"Gender:     {patient_data.gender}")
 
-    for service_request in path_report_components.service_requests:
+    for i_service_request,service_request in enumerate(path_report_components.service_requests):
+        text_report_strings.append("")
+        text_report_strings.append(f"SERVICE_REQUEST ({i_service_request+1})")      
         service_request_data=ServiceRequestData(service_request=service_request)
-        text_report_strings.append("")
-        text_report_strings.append(f'Request Id:        {service_request_data.request_id}')
-        text_report_strings.append(f'Requisition Id:    {service_request_data.requisition_id}')
-        text_report_strings.append(f'Requested test:    {service_request_data.requested_test}')
-        text_report_strings.append(f'Requester:         {service_request_data.requester}')
-        text_report_strings.append(f'Request date:      {service_request_data.request_date}')
-        text_report_strings.append(f'Clinical details:  {service_request_data.clinical_details}')
-        text_report_strings.append(f'Comments:          {service_request_data.request_note}')
+        text_report_strings.append(f"Request Id:        {service_request_data.request_id}")
+        text_report_strings.append(f"Requisition Id:    {service_request_data.requisition_id}")
+        text_report_strings.append(f"Requested test:    {service_request_data.requested_test}")
+        text_report_strings.append(f"Requester:         {service_request_data.requester}")
+        text_report_strings.append(f"Request date:      {service_request_data.request_date}")
+        text_report_strings.append(f"Clinical details:  {service_request_data.clinical_details}")
+        text_report_strings.append(f"Comments:")
+        for note in service_request_data.notes:
+            text_report_strings.append(f"{note}")
 
-    for specimen in path_report_components.specimens: 
-        specimen_data=SpecimenData(specimen=specimen)
+    for i_specimen, specimen in enumerate(path_report_components.specimens):
         text_report_strings.append("")
-        text_report_strings.append(f'Requester Specimen Id:   {specimen_data.requester_specimen_id}')
-        text_report_strings.append(f'Laboratory Accession Id: {specimen_data.laboratory_accession_id}')
-        text_report_strings.append(f'Specimen Type:           {specimen_data.specimen_type}')
-        text_report_strings.append(f'Collected Date:          {specimen_data.collected_date}')
-        text_report_strings.append(f'Received Date:           {specimen_data.received_date}')
+        text_report_strings.append(f"SPECIMEN ({i_specimen+1})") 
+        specimen_data=SpecimenData(specimen=specimen)
+        text_report_strings.append(f"Requester Specimen Id:   {specimen_data.requester_specimen_id}")
+        text_report_strings.append(f"Laboratory Accession Id: {specimen_data.laboratory_accession_id}")
+        text_report_strings.append(f"Specimen Type:           {specimen_data.specimen_type}")
+        text_report_strings.append(f"Collected Date:          {specimen_data.collected_date}")
+        text_report_strings.append(f"Received Date:           {specimen_data.received_date}")
+        text_report_strings.append(f"Comments:")
+        for note in specimen_data.notes:
+            text_report_strings.append(f"{note}")
 
     diagnostic_report_data=DiagnosticReportData(
         diagnostic_report=path_report_components.diagnostic_report, 
         resources_by_fullUrl=resources_by_fullUrl,
         )
     text_report_strings.append("")
-    text_report_strings.append(f'Report Id:        {diagnostic_report_data.report_id}')
-    text_report_strings.append(f'Issued Date:      {diagnostic_report_data.issued_date}')
-    text_report_strings.append(f'Provider Name:    {diagnostic_report_data.provider_name}')
-    text_report_strings.append(f'Provider Address: {diagnostic_report_data.provider_address}')
-
+    text_report_strings.append(f"REPORT")
+    text_report_strings.append(f"Report Id:        {diagnostic_report_data.report_id}")
+    text_report_strings.append(f"Issued Date:      {diagnostic_report_data.issued_date}")
+    text_report_strings.append(f"Provider Name:    {diagnostic_report_data.provider_name}")
+    text_report_strings.append(f"Provider Address: {diagnostic_report_data.provider_address}")
+    text_report_strings.append(f"Comments:")
+    for note in diagnostic_report_data.notes:
+        text_report_strings.append(f"{note}")
+    
     output_strings=process_report_observations(
         primary_observations=path_report_components.primary_observations,
         resources_by_fullUrl=resources_by_fullUrl,
         )
-    
     text_report_strings.append("")
+    text_report_strings.append(f"RESULTS")
     for output_string in output_strings:
         text_report_strings.append(output_string)
 
-    comments=format_none_to_null_string(diagnostic_report_data.comments)
+    conclusion=format_none_to_null_string(diagnostic_report_data.conclusion)
     text_report_strings.append("")
-    text_report_strings.append(f"Comments: {comments}" )
+    text_report_strings.append(f"Diagnostic Report Conclusion:" )
+    text_report_strings.append(f"{conclusion}" )
 
     return text_report_strings
 

@@ -4,7 +4,8 @@ class SpecimenData():
         "laboratory_accession_id",
         "specimen_type",
         "collected_date",
-        "received_date"
+        "received_date",
+        "notes",
         ]
 
     def __init__ (self, specimen=None):
@@ -13,4 +14,8 @@ class SpecimenData():
         self.specimen_type=specimen.type.coding[0].display # just take first coding
         self.collected_date=specimen.collection.collectedDateTime
         self.received_date=specimen.receivedTime
+        if specimen.note is not None:
+            self.notes=[x.text for x in specimen.note]
+        else:
+            self.notes=[]
         

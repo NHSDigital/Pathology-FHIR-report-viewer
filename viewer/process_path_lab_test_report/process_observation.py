@@ -9,7 +9,7 @@ def process_observation(observation=None, output_strings=None, resources_by_full
     
     if observation.hasMember is not None: # it's a "grouper"
                                           # assume that a grouper has no value  
-        formatted_output=(f"{code:18} | {display:55} ")
+        formatted_output=f"{code:18} | {display:55} "
         output_strings.append(formatted_output)
         for member_id in observation.hasMember:
             member_observation=resources_by_fullUrl[member_id.reference]
@@ -22,7 +22,6 @@ def process_observation(observation=None, output_strings=None, resources_by_full
         parsed_value, reference_low, reference_high, reference_text=parse_value_entity(observation)
         formatted_output=(f"{code:18} | {display:55} | {str(parsed_value):16}")
         if reference_text!="No reference range information":
-            # formatted_output=(f"{code:18} | {display:55} | {str(parsed_value):16}") 
             if (reference_low is not None) and (reference_high is not None):
                 formatted_output += f" (reference: {str(reference_low):16} - {str(reference_high):16})" 
             if reference_text is not None:
@@ -35,6 +34,13 @@ def process_observation(observation=None, output_strings=None, resources_by_full
                 reference_text=padding.join(temp_strings)
 
                 formatted_output += f" ({reference_text})"
+        if observation.interpretation is not None:
+            interpretation_display=observation.interpretation[0].coding[0].display  # just use first coding of first interpretation
+            interpretation_code=observation.interpretation[0].coding[0].code                  # ditto
+            formatted_output += f" | {interpretation_code} : {interpretation_display} "
         output_strings.append(formatted_output)
+        if observation.note is not None:
+            for note in observation.note:
+                output_strings.append(f"Comment: {note.text}")
     return output_strings
 

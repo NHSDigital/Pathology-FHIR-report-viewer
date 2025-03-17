@@ -22,15 +22,23 @@ class ParsedValue():
         "value",
         "unit",
         "comparator",
+        "value_low",
+        "value_high",
     ]
     
-    def __init__(self,value=None, unit=None, comparator=None):
+    def __init__(self, value=None, unit=None, comparator=None, value_low=None, value_high=None):
         self.value=value
         self.unit=unit
         self.comparator=comparator
+        self.value_low=value_low
+        self.value_high=value_high
     
     def __str__(self):
-        value_repr_string=f"{self.value}"
+        value_repr_string=""
+        if self.value:
+            value_repr_string=f"{self.value}"
+        if self.value_low:
+            value_repr_string=f"{self.value_low}-{self.value_high}"
         if self.unit is not None:
             value_repr_string=f"{value_repr_string} {self.unit}"
         if self.comparator is not None:
@@ -66,8 +74,6 @@ def parse_value_entity(value_entity):
             value=temp_value
             )
 
-
-    
     elif value_entity.valueCodeableConcept is not None:
         parsed_value=ParsedValue(
             value=value_entity.valueCodeableConcept.coding[0].display
@@ -75,24 +81,11 @@ def parse_value_entity(value_entity):
 
     elif value_entity.valueRange is not None:
         parsed_value=ParsedValue(
-            value="ValueRange not implemented yet"
+            value_low=  value_entity.valueRange.low.value,
+            value_high= value_entity.valueRange.high.value,
+            unit= value_entity.valueRange.low.unit # assume units of high and low are same 
+                                                   # only uses "unit" and not "code"  
             )
-    # ValueRange still to do
-    # check that not more than one type still to do? or take as read
-        # <valueRange>
-        #   <low>
-        #     <value value="10" />
-        #     <unit value="x10*6/L" />
-        #     <system value="http://unitsofmeasure.org" />
-        #     <code value="10^6/L" />
-        #   </low>
-        #   <high>
-        #     <value value="35" />
-        #     <unit value="x10*6/L" />
-        #     <system value="http://unitsofmeasure.org" />
-        #     <code value="10^6/L" />
-        #   </high>
-        # </valueRange>
     else:
         parsed_value=ParsedValue(
             value="value type not recognised"

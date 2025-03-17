@@ -6,7 +6,7 @@ class ServiceRequestData():
         "requester",
         "request_date",
         "clinical_details",
-        "request_note",
+        "notes",
         "requisition_id"
         ]
 
@@ -27,6 +27,6 @@ class ServiceRequestData():
             self.clinical_details=""
         
         if service_request.note is not None:
-            self.request_note=[x.text for x in service_request.note]
+            self.notes=[x.text for x in service_request.note]
         else:
-            self.request_note=""
+            self.notes=[]
