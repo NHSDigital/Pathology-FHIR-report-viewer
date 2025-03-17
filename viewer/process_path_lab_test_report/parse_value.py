@@ -35,9 +35,9 @@ class ParsedValue():
     
     def __str__(self):
         value_repr_string=""
-        if self.value:
+        if self.value is not None:
             value_repr_string=f"{self.value}"
-        if self.value_low:
+        if self.value_low is not None:
             value_repr_string=f"{self.value_low}-{self.value_high}"
         if self.unit is not None:
             value_repr_string=f"{value_repr_string} {self.unit}"

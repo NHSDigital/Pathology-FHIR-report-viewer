@@ -4,12 +4,12 @@ import sys
 
 from .parse_bundle_message import parse_bundle_message
 from .process_report_observations import process_report_observations
-from .utils import format_address_item, format_none_to_null_string
 from .process_path_report_bundle import PathReportComponents
 from .process_specimen import SpecimenData
 from .process_patient import PatientData
 from .process_diagnostic_report import DiagnosticReportData
 from .process_service_request import ServiceRequestData
+from .utils import format_none_to_null_string
 
 def process_fhir_bundle_report_to_text(
     filename=None, 
@@ -42,7 +42,7 @@ def process_fhir_bundle_report_to_text(
     # text_report_strings.append(f"sp: {[x.id for x in specimens]}")
     # text_report_strings.append(f"po: {[x.id for x in primary_observations]}")
     
-    text_report_strings.append(f"PATIENT")
+    text_report_strings.append(f"ABOUT THE PATIENT!!!")
     patient_data=PatientData(patient_resource=path_report_components.patient)
     text_report_strings.append(f"NHS Number: {patient_data.nhs_number}")
     text_report_strings.append(f"Name:       {patient_data.name}")
