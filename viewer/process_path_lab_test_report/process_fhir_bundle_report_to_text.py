@@ -23,10 +23,15 @@ def process_fhir_bundle_report_to_text(
     # These are passed on to parse_bundle_message which handle the distinction
     # (depending on which one is not None)
     
-    resources_by_fullUrl, resources_by_type=parse_bundle_message(
+    resources_by_fullUrl, resources_by_type, failure_info=parse_bundle_message(
         filename=filename,
         flask_FileStorage=flask_FileStorage,
         )
+    
+    if failure_info is not None:
+        return failure_info
+    
+
     
     # diagnostic_report, patient, service_requests, specimens, primary_observations=follow_references(
     path_report_components=PathReportComponents(

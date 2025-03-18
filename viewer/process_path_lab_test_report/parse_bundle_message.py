@@ -1,5 +1,5 @@
 
-import sys
+import sys, traceback
 
 from fhir.resources.R4B.bundle import Bundle
 
@@ -38,8 +38,13 @@ def parse_bundle_message(filename=None, flask_FileStorage=None):
                 cleaned_string_data_list.append(line)
         string_data="\n".join(cleaned_string_data_list)
 
-    bundle=Bundle.parse_raw(string_data, content_type=file_type)
-
+    try:
+        bundle=Bundle.parse_raw(string_data, content_type=file_type)
+    except Exception as exception:
+        failure_message_strings=["An error occurred parsing the message Bundle. Details:"]
+        failure_message_strings.append("".join(traceback.format_exception(exception)))
+        return None, None, failure_message_strings
+    
     resources_by_type={}
     resources_by_fullUrl={}
     for be in bundle.entry:
@@ -50,4 +55,4 @@ def parse_bundle_message(filename=None, flask_FileStorage=None):
         resources_by_type[r_type].append(r)
         resources_by_fullUrl[be.fullUrl]=r
 
-    return resources_by_fullUrl, resources_by_type
+    return resources_by_fullUrl, resources_by_type, None

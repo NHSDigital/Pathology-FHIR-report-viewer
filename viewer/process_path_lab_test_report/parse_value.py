@@ -1,18 +1,20 @@
 
 import sys
 
+from .utils import format_None_to_null_string
+
 implemented_value_types=[
     "valueQuantity",
     "valueCodeableConcept", 
     "valueRange", 
     "valueString",
+    "valueRatio",
 ]
 unimplemented_value_types=[
     "valueTime", 
     "valueDateTime", 
     "valueInteger", 
     "valuePeriod", 
-    "valueRatio", 
     "valueSampledData", 
     "valueBoolean",
 ]
@@ -24,14 +26,33 @@ class ParsedValue():
         "comparator",
         "value_low",
         "value_high",
+        "numerator",
+        "numerator_unit",
+        "denominator",
+        "denominator_unit",
     ]
     
-    def __init__(self, value=None, unit=None, comparator=None, value_low=None, value_high=None):
+    def __init__(
+        self, 
+        value=None, 
+        unit=None, 
+        comparator=None, 
+        value_low=None, 
+        value_high=None,
+        numerator=None,
+        numerator_unit=None,
+        denominator=None,
+        denominator_unit=None
+        ):
         self.value=value
         self.unit=unit
         self.comparator=comparator
         self.value_low=value_low
         self.value_high=value_high
+        self.numerator=numerator
+        self.numerator_unit=numerator_unit
+        self.denominator_unit=denominator_unit
+        self.denominator=denominator
     
     def __str__(self):
         value_repr_string=""
@@ -43,6 +64,8 @@ class ParsedValue():
             value_repr_string=f"{value_repr_string} {self.unit}"
         if self.comparator is not None:
             value_repr_string=f"{self.comparator} {value_repr_string}"
+        if self.numerator is not None:
+            value_repr_string=f"{format_None_to_null_string(self.numerator)}{format_None_to_null_string(self.numerator_unit)}/{format_None_to_null_string(self.denominator)}{format_None_to_null_string(self.denominator_unit)}"
         return value_repr_string
 
 
@@ -56,7 +79,8 @@ def parse_value_entity(value_entity):
     for value_type in unimplemented_value_types:
         if getattr(value_entity, value_type) is not None:
             print(f"Encountered unimplemented value type: {value_type}")
-            sys.exit()
+            reference_text="No reference range information"
+            return f"unsupported type:{value_type}", None, None, reference_text
 
     if value_entity.valueQuantity is not None:
         parsed_value=ParsedValue(
@@ -85,6 +109,13 @@ def parse_value_entity(value_entity):
             value_high= value_entity.valueRange.high.value,
             unit= value_entity.valueRange.low.unit # assume units of high and low are same 
                                                    # only uses "unit" and not "code"  
+            )
+    elif value_entity.valueRatio is not None:
+        parsed_value=ParsedValue(
+            numerator=        value_entity.valueRatio.numerator.value,
+            numerator_unit=   value_entity.valueRatio.numerator.unit, 
+            denominator=      value_entity.valueRatio.denominator.value,
+            denominator_unit= value_entity.valueRatio.denominator.unit,
             )
     else:
         parsed_value=ParsedValue(
