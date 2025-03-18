@@ -17,7 +17,7 @@ def format_address_item(address_item=None):
 # output None as null string #
 ##############################
 
-def format_none_to_null_string(item):
+def format_None_to_null_string(item):
     if item is None:
         return ""
     else:

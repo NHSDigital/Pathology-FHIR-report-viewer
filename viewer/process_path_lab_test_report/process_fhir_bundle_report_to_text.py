@@ -9,7 +9,7 @@ from .process_specimen import SpecimenData
 from .process_patient import PatientData
 from .process_diagnostic_report import DiagnosticReportData
 from .process_service_request import ServiceRequestData
-from .utils import format_none_to_null_string
+from .utils import format_None_to_null_string
 
 def process_fhir_bundle_report_to_text(
     filename=None, 
@@ -100,7 +100,7 @@ def process_fhir_bundle_report_to_text(
     for output_string in output_strings:
         text_report_strings.append(output_string)
 
-    conclusion=format_none_to_null_string(diagnostic_report_data.conclusion)
+    conclusion=format_None_to_null_string(diagnostic_report_data.conclusion)
     text_report_strings.append("")
     text_report_strings.append(f"Diagnostic Report Conclusion:" )
     text_report_strings.append(f"{conclusion}" )
