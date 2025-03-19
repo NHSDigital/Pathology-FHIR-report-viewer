@@ -1,7 +1,7 @@
 
 import sys, traceback
 
-from fhir.resources.R4B.bundle import Bundle
+from fhir.resources.R4B.bundle import Bundle # not sure why but R4B seems needed or get error parsing bundle
 
 ########################
 # parse_bundle_message #

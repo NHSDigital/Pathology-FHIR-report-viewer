@@ -13,7 +13,9 @@ from .utils import format_None_to_null_string
 
 def process_fhir_bundle_report_to_text(
     filename=None, 
-    flask_FileStorage=None
+    flask_FileStorage=None,
+    path_report_components=None, # this is so tests can maniulate the components and pass them in
+    resources_by_fullUrl=None,   # ditto
     ):
     
     # This routine can be called from a Flask app or a plain script
@@ -22,24 +24,26 @@ def process_fhir_bundle_report_to_text(
     #     a flask FileStorage object 
     # These are passed on to parse_bundle_message which handle the distinction
     # (depending on which one is not None)
+    # OR it accepts the pre parsed and processed path_report_components and resources_by_full_Url for running tests
     
-    resources_by_fullUrl, resources_by_type, failure_info=parse_bundle_message(
-        filename=filename,
-        flask_FileStorage=flask_FileStorage,
-        )
-    
-    if failure_info is not None:
-        return failure_info
-    
+    if path_report_components is None: # this is usually the case, when a filename or flask FileStorage object is passed in 
+        resources_by_fullUrl, resources_by_type, failure_info=parse_bundle_message(
+            filename=filename,
+            flask_FileStorage=flask_FileStorage,
+            )
+        
+        if failure_info is not None:
+            return failure_info
+        
+        # diagnostic_report, patient, service_requests, specimens, primary_observations=follow_references(
+        path_report_components=PathReportComponents(
+            resources_by_fullUrl=resources_by_fullUrl, 
+            resources_by_type=resources_by_type,
+            )
 
-    
-    # diagnostic_report, patient, service_requests, specimens, primary_observations=follow_references(
-    path_report_components=PathReportComponents(
-        resources_by_fullUrl=resources_by_fullUrl, 
-        resources_by_type=resources_by_type,
-        )
+    text_report_strings=[f"(Processed message starts)"] # This is used by test scripts
+    text_report_strings.append(f"") 
 
-    text_report_strings=[]
 
     # text_report_strings.append(f"dr: {diagnostic_report.id}")
     # text_report_strings.append(f"p: {patient.id}")
@@ -109,6 +113,9 @@ def process_fhir_bundle_report_to_text(
     text_report_strings.append("")
     text_report_strings.append(f"Diagnostic Report Conclusion:" )
     text_report_strings.append(f"{conclusion}" )
+
+    text_report_strings.append(f"") 
+    text_report_strings.append(f"(End of processed message)") # This is used by test scripts to check that seemed to complete
 
     return text_report_strings
 

@@ -71,10 +71,7 @@ class ParsedValue():
 
 
 def parse_value_entity(value_entity):
-    # value_entity can be 
-    #      the observation object itelf 
-    #      or can be a component of the observation value
-    # Both of these objects have the same elements, i.e. value<type>, referenceRange, reasonAbsent, ..
+    # value_entity is an Observation resource
 
     for value_type in unimplemented_value_types:
         if getattr(value_entity, value_type) is not None:
@@ -137,11 +134,13 @@ def parse_value_entity(value_entity):
                 unit=value_entity.referenceRange[0].low.unit,
                 comparator=value_entity.referenceRange[0].low.comparator,
             )
+
+            
         else:
             reference_low=None
         reference_text=value_entity.referenceRange[0].text
     else:
         reference_low=reference_high=None
         reference_text="No reference range information"
-    # print(value_entity)
+
     return parsed_value, reference_low, reference_high, reference_text

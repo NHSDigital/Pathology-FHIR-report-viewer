@@ -1,4 +1,3 @@
-from .parse_value import parse_value_entity
 class PathReportComponents():
     __slots__=[
         "message_header",

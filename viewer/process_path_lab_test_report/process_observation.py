@@ -2,11 +2,13 @@ from .parse_value import parse_value_entity
 
 def process_observation(observation=None, output_strings=None, resources_by_fullUrl=None):
     
-    # if observation.meta.profile[0] == "https://fhir.hl7.org.uk/StructureDefinition/UKCore-Observation-Group-Lab": # it's a "grouper"
-    
-    display=observation.code.coding[0].display # just use first coding
-    code=observation.code.coding[0].code       # ditto
-    
+    if (observation.code is not None) and (observation.code.coding[0] is not None): 
+        display=observation.code.coding[0].display # just use first coding
+        code=observation.code.coding[0].code       # ditto
+    else:
+        display=""
+        code=""
+
     if observation.hasMember is not None: # it's a "grouper"
                                           # assume that a grouper has no value  
         formatted_output=f"{code:18} | {display:55} "
