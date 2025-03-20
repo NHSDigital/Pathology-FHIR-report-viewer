@@ -24,7 +24,7 @@ class ServiceRequestData():
         
         if (service_request.code is not None) and (service_request.code.coding is not None):
             requested_coding=service_request.code.coding[0] # just take first coding
-            self.requested_test=f"{requested_coding.code}:{requested_coding.display}" 
+            self.requested_test=f"{format_None_to_null_string(requested_coding.code)}:{format_None_to_null_string(requested_coding.display)}" 
         else:
             self.requested_test=""
         

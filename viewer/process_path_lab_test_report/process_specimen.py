@@ -1,3 +1,4 @@
+from .utils import format_None_to_null_string
 class SpecimenData():
     __slots__=[
         "requester_specimen_id",
@@ -20,7 +21,8 @@ class SpecimenData():
             self.laboratory_accession_id=""
 
         if (specimen.type is not None) and (specimen.type.coding is not None):
-            self.specimen_type=specimen.type.coding[0].display # just take first coding
+            specimen_coding=specimen.type.coding[0] # just take first coding
+            self.specimen_type= f"{format_None_to_null_string(specimen_coding.code)}:{format_None_to_null_string(specimen_coding.display)}" 
         else:
             self.specimen_type=""
         

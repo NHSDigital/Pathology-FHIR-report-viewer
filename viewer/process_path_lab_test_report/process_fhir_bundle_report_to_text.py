@@ -47,7 +47,6 @@ def process_fhir_bundle_report_to_text(
     text_report_strings.append(f"DOB:        {patient_data.dob}")
     text_report_strings.append(f"Gender:     {patient_data.gender}")
     
-
     for i_service_request,service_request in enumerate(path_report_components.service_requests):
         text_report_strings.append("")
         text_report_strings.append(f"SERVICE_REQUEST ({i_service_request+1})")      
