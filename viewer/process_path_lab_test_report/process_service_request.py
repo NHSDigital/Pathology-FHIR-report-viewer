@@ -43,8 +43,13 @@ class ServiceRequestData():
         if ( (service_request.requester is not None) and                # note that order of clauses here is important as first False will terminate evaluation
             (service_request.requester.reference is not None) and       # so that subsequent clauses do not trigger an exception
             (service_request.requester.reference in resources_by_fullUrl) and 
-            (resources_by_fullUrl[service_request.requester.reference].resource_type=="Practitioner")
+            (resources_by_fullUrl[service_request.requester.reference].resource_type=="Practitioner") # assumes specifying via Practitioner
             ):
+
+            # it should be simple enough to modify the if clause above so that an extra step of logic
+            # inserted if the requester resource type is a "PractitionerRole"
+            # that logic would use the PractitionerRole to determine the Practioner resource to point practioner variable below at
+            # (with a similar if clause as above protecting the code in case the reference does not exist etc
 
             practitioner=resources_by_fullUrl[service_request.requester.reference] 
             name=practitioner.name[0] # just taking the first of available full names

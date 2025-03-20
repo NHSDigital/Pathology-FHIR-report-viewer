@@ -21,8 +21,9 @@ def parse_bundle_message(filename=None, flask_FileStorage=None):
     elif len(filename)>=5 and filename[-4:]==".xml":
         file_type="xml"
     else:
-        print("Unknown filetype: must be .json or .xml")
-        sys.exit()
+        return None, None, ["Unknown filetype: must be .json or .xml"]
+        # print("U")
+        # sys.exit()
 
     # different approaches needed to get string data depending whether from Flask or via filename
     if flask_FileStorage is not None:

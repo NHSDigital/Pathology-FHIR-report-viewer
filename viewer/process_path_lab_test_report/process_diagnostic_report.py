@@ -18,6 +18,9 @@ class DiagnosticReportData():
         self.issued_date=format_None_to_null_string(diagnostic_report.issued)
         self.provider_name=resources_by_fullUrl[diagnostic_report.performer[0].reference].name       # assumes only one performer, that reference exists,
         self.provider_address=format_address_item(resources_by_fullUrl[diagnostic_report.performer[0].reference].address[0]) # and that it is an Organization with one address
+                       # similar considerations apply as in comment in process_service_request.py about if the
+                       # performer is specified by a PractitionerRole
+        
         self.conclusion=format_None_to_null_string(diagnostic_report.conclusion)
         self.notes=[]
         if diagnostic_report.extension is not None:

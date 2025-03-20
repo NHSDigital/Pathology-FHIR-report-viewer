@@ -1,4 +1,21 @@
 #!/usr/bin/python
+"""
+This script checks how gracefully the report making routine handles missing elements in a pathology report message Bundle
+
+The script parses a well populated message Bundle and selectively sets a range of elements to None
+
+Each time round the main loop a different element is set to None (and the whole process below repeated)
+
+After modification of a specific resource element the bundle is reconstructed into a temp file
+
+The temp file is then processed by the report making script and the output is monitored for
+(i) uncaught exceptions
+(ii) whether something odd enough has happened (judged by the standard last line of the output not being present)
+
+The output report is shown along with a summary line of the apparent outcome
+
+The summary line contains "TEXT_SUMMARY:" at the start so output can be filtered for simply those lines if desired
+"""
 
 import os, sys, tempfile, copy, traceback
 
@@ -10,8 +27,7 @@ from process_path_lab_test_report.process_fhir_bundle_report_to_text import proc
 from process_path_lab_test_report.parse_bundle_message import parse_bundle_message
 from process_path_lab_test_report.process_path_report_bundle import PathReportComponents
 
-
-def create_temp_file(
+def create_temp_file_from_bundle(
     resources_by_type=None,
     resources_by_fullUrl=None,
     ):
@@ -41,109 +57,87 @@ def delete_temp_file(fp=None):
                         #     TypeError: NamedTemporaryFile() got an unexpected keyword argument 'delete_on_close'
                         # for reason do not understand, so manually deleting instead
 
-def set_element_to_None(
-    resource=None,
-    element=None,
-    resources_by_fullUrl=None,
-    ):
-    test_resource=copy.deepcopy(resource)
-    exec(f"test_resource.{element}=None")
-    fullUrl=f"urn:uuid:{test_resource.id}"
-    resources_by_fullUrl[fullUrl]=test_resource
-    element_spec=f"{resource.resource_type}.{element}"
-    return element_spec
 
-def restore_element(
-    resource=None,
-    element=None,
-    resources_by_fullUrl=None,
-    ):
-    fullUrl=f"urn:uuid:{resource.id}"
-    resources_by_fullUrl[fullUrl]=resource
-    return element_spec
+report_fhir_bundle_filename=sys.argv[1] # this should be an example bundle that processes well and has a high degree of populated elements
 
-report_fhir_bundle_filename=sys.argv[1]
+###############
+# "main loop" #
+###############
 
-###########################################
-# process bundle into component resources #
-# so that can then manipulate them        #
-###########################################
-
-resources_by_fullUrl, resources_by_type, failure_info=parse_bundle_message(
-    filename=report_fhir_bundle_filename,
-    )
-
-path_report_components=PathReportComponents(
-    resources_by_fullUrl=resources_by_fullUrl, 
-    resources_by_type=resources_by_type,
-    )
-
-##################################
-# delete service request content #
-##################################
-
-service_request=path_report_components.service_requests[0]
-specimen=path_report_components.specimens[0]
-patient=path_report_components.patient
-diagnostic_report=path_report_components.diagnostic_report
-
-for resource, element in [
-    [patient, "identifier"],
-    [patient, "name"],
+for resource_name, element in [
+    ["patient", "identifier"],
+    ["patient", "name"],
     # [patient, "name[0]"],    # this is illegal in the bundle and only want to test things here that pass bundle parsing
-    [patient, "name[0].family"],
-    [patient, "name[0].given"],
-    [patient, "address"],
-    [patient, "address[0].line"],
-    [patient, "address[0].city"],
-    [patient, "address[0].district"],
-    [patient, "address[0].postalCode"],
-    [patient, "birthDate"],
-    [patient, "gender"],
-    [service_request, "identifier"],
-    [service_request, "requisition"],
-    [service_request, "requester"],
-    [service_request, "authoredOn"],
-    [service_request, "code"],
-    [service_request, "code.coding"],
+    ["patient", "name[0].family"],
+    ["patient", "name[0].given"],
+    ["patient", "address"],
+    ["patient", "address[0].line"],
+    ["patient", "address[0].city"],
+    ["patient", "address[0].district"],
+    ["patient", "address[0].postalCode"],
+    ["patient", "birthDate"],
+    ["patient", "gender"],
+    ["service_request", "identifier"],
+    ["service_request", "requisition"],
+    ["service_request", "requester"],
+    ["service_request", "authoredOn"],
+    ["service_request", "code"],
+    ["service_request", "code.coding"],
     # [service_request, "code.coding[0]"], # this gives an illegal bundle as above
-    [service_request, "code.coding[0].code"],
-    [service_request, "code.coding[0].display"],
-    [service_request, "reasonCode"],
-    [service_request, "note"],
-    [specimen,        "identifier"],
-    [specimen,        "accessionIdentifier"],
-    [specimen,        "type"],
-    [specimen,        "type.coding"],
-    [specimen,        "type.coding[0].display"],
-    [specimen,        "collection"],
-    [specimen,        "collection.collectedDateTime"],
-    [diagnostic_report, "identifier"],
-    [diagnostic_report, "issued"],
+    ["service_request", "code.coding[0].code"],
+    ["service_request", "code.coding[0].display"],
+    ["service_request", "reasonCode"],
+    ["service_request", "note"],
+    ["specimen",        "identifier"],
+    ["specimen",        "accessionIdentifier"],
+    ["specimen",        "type"],
+    ["specimen",        "type.coding"],
+    ["specimen",        "type.coding[0].display"],
+    ["specimen",        "collection"],
+    ["specimen",        "collection.collectedDateTime"],
+    ["diagnostic_report", "identifier"],
+    ["diagnostic_report", "issued"],
     #this code cannot follow references, or extensions so cannot test DiagnosticReportData.notes or .provider_name or .provide_address
     ]:
 
+    print("##########################################################################")
+    print("##########################################################################")
+    
+    element_spec=f"{resource_name}.{element}"
 
-    element_spec=set_element_to_None(
-        resource=resource,
-        element=element,
-        resources_by_fullUrl=resources_by_fullUrl,
+    print(f"TESTING: {element_spec}")
+        
+    ###############################################################################
+    # Process the bundle file from scratch every time round loop so that do not   #
+    # have to undo the modifications made below                                   #
+    ###############################################################################    
+    
+    resources_by_fullUrl, resources_by_type, failure_info=parse_bundle_message(
+        filename=report_fhir_bundle_filename,
         )
+    path_report_components=PathReportComponents(
+        resources_by_fullUrl=resources_by_fullUrl, 
+        resources_by_type=resources_by_type,
+        )
+    service_request=path_report_components.service_requests[0]  # just test effect in first service request
+    specimen=path_report_components.specimens[0]                # just test effect in first specimen
+    patient=path_report_components.patient                      
+    diagnostic_report=path_report_components.diagnostic_report
+    
+    ############################
+    # apply the modification   #
+    ############################
+    
+    exec(f"{resource_name}.{element}=None")
 
-    print(f"{element_spec}")
+    #########################################################
+    # recreate bundle as temp file and run processing on it #
+    #########################################################
 
-    ################################
-    # recreate bundle as temp file #
-    ################################
-
-    fp=create_temp_file(
+    fp=create_temp_file_from_bundle(
         resources_by_type=resources_by_type,
         resources_by_fullUrl=resources_by_fullUrl,
         )
-
-    ##################
-    # run processing #
-    ##################
 
     failed=False
     text_report_strings=[]
@@ -153,7 +147,13 @@ for resource, element in [
         print("")
         print("".join(traceback.format_exception(exception)))
         failed=True
-        
+
+    delete_temp_file(fp)
+    
+    ###############
+    # make output #
+    ###############
+
     print("\n".join(text_report_strings))
 
     if failed:
@@ -163,18 +163,5 @@ for resource, element in [
     else:
         message="OK:    Processing apparently finished OK"
     
-    print(f"TEST_SUMMARY: {element_spec:30} : {message}")
+    print(f"TEST_SUMMARY: {element_spec:40} : {message}")
     
-    delete_temp_file(fp)
-
-    restore_element(  # this is necessary because otherwise the last call to a particular resource leaves that resource in a bad state
-        resource=resource,
-        element=element,
-        resources_by_fullUrl=resources_by_fullUrl,
-        )
-    
-
-
-
-
-
